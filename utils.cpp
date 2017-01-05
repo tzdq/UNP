@@ -25,11 +25,10 @@ char *sock_ntop(const struct sockaddr *addr, socklen_t len) {
     return str;
 }
 /**
- *
  * @param family
  * @param strptr
  * @param addrptr
- * @return
+ * @return success(1) fail(0)
  */
 int inet_pton_loose(int family,const char* strptr,void *addrptr) {
     if(inet_pton(family,strptr,addrptr) == 0){
