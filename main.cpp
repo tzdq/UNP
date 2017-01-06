@@ -32,5 +32,15 @@ int main() {
                 ,strptr[10],strptr[11],strptr[12],strptr[13],strptr[14],strptr[15]);
     }
 
+    struct  sockaddr_in6 saddr;
+    memset(&saddr,0, sizeof(saddr));
+    saddr.sin6_family = AF_INET6;
+    saddr.sin6_port = htons(8888);
+    char str[128] = {0};
+    inet_pton(AF_INET6,"::FFFF:192.168.1.54",(void*)&saddr.sin6_addr);
+    cout << sock_ntop((struct sockaddr*)&saddr, sizeof(saddr)) <<endl;
+    cout << inet_ntop(AF_INET6,&saddr.sin6_addr,str,sizeof(str))<<endl;
+
+
     return 0;
 }
