@@ -2,18 +2,12 @@
 #include <netinet/in.h>
 #include <sys/types.h>
 #include "utils.h"
+#include <vector>
+#include <fstream>
+#include "unp.h"
 using namespace std;
-int main() {
-    union {
-        short s;
-        char c[sizeof(s)];
-    }un;
-
-    un.s = 0x0102;
-    if(un.c[0] == 1 && un.c[1] == 2)cout << "Big"<<endl;
-    else if(un.c[0] == 2 && un.c[1] == 1)cout <<"little" <<endl;
-    else cout << "unknown"<<endl;
-
+int xmain() {
+#if 0
      uint16_t port =  htons(1234);
     cout << port <<endl;
 
@@ -41,6 +35,22 @@ int main() {
     cout << sock_ntop((struct sockaddr*)&saddr, sizeof(saddr)) <<endl;
     cout << inet_ntop(AF_INET6,&saddr.sin6_addr,str,sizeof(str))<<endl;
 
+    vector<int> v= {1,2};
+    auto i = v.front();
+    i = 10;
+    cout << v.front();
 
+    cout << judgeEnduan()<<endl;
+    struct sockaddr_in addr;
+    char buf[INET_ADDRSTRLEN] = {0};
+    cout << my_inet_pton_ipv4(AF_INET,"192.168.1.54",&addr)<<endl;
+    cout << my_inet_ntop_ipv4(AF_INET,&addr,buf,INET_ADDRSTRLEN)<<endl;
+#else
+    fstream fin("../a.txt");
+    for(int i = 0 ; i < 2000;i++){
+        fin << i << endl;
+    }
+
+#endif
     return 0;
 }

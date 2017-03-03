@@ -11,8 +11,8 @@
  * @return inet_ntop失败返回nullptr，协议错误返回带错误信息的字符串strptr，反之返回点分十进制的IP地址
  */
 char *sock_ntop(const struct sockaddr *addr, socklen_t len) {
-    char portstr[8];
-    static char strptr[128];
+    char portstr[8] = {0};
+    static char strptr[128] = {0};
 
     memset(portstr,0, sizeof(portstr));
     memset(strptr,0, sizeof(strptr));
@@ -81,4 +81,57 @@ int inet_pton_loose(int family,const char* strptr,void *addrptr) {
         return 0;
     }
     return 1;
+}
+
+/**
+ * @func  判断当前系统的字节序
+ * @param None
+ * @return int 大端字节序返回1，小端字节序返回0，错误返回-1
+ */
+int judgeEnduan() {
+    union {
+        short s;
+        char ch[2];
+    }un;
+    un.s  = 0x0102;
+    if(un.ch[0] == 1 and un.ch[1] == 2)
+        return 1;
+    if(un.ch[0] == 2 and un.ch[1] == 1)
+        return 0;
+    return -1;
+}
+/**
+ * @func  把点分十进制的IP转化为数值形式
+ * @param family  协议
+ * @param addrptr 转化后地址存储空间
+ * @param strptr  点分十进制的字符串形式的IP地址
+ * @return int 字符串有效返回1，无效返回0，错误返回-1
+ */
+int my_inet_pton_ipv4(int family, const char *strptr, void *addrptr) {
+    if(family == AF_INET){
+        struct  in_addr addr;
+        if(inet_aton(strptr,&addr)){
+            memcpy(addrptr,&addr, sizeof(addr));
+            return 1;
+        }
+        return 0;
+    }
+    errno = EAFNOSUPPORT;
+    return -1;
+}
+
+const char *my_inet_ntop_ipv4(int family, const void *addrptr, char *strptr, size_t addrlen) {
+   const u_char *addr = (const u_char*) addrptr;
+    if(family == AF_INET){
+       char tmp[INET_ADDRSTRLEN] = {0};
+        snprintf(tmp, sizeof(tmp),"%d.%d.%d.%d",addr[0],addr[1],addr[2],addr[3]);
+        if(strlen(tmp) >= addrlen){
+            errno = ENOSPC;
+            return nullptr;
+        }
+        strcpy(strptr,tmp);
+        return  strptr;
+   }
+    errno = EAFNOSUPPORT;
+    return nullptr;
 }
