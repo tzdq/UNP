@@ -3,5 +3,5 @@ project(unp)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(SOURCE_FILES main.cpp utils.h utils.cpp unp.h readn.cpp sock.cpp error.cpp tcpserver.cpp tcpclient.cpp Signal.cpp)
+set(SOURCE_FILES main.cpp utils.h utils.cpp unp.h readn.cpp sock.cpp error.cpp tcpserver.cpp tcpclient.cpp Signal.cpp web.h web.cpp checkopt.cpp daytimetcpcli.cpp udpclient.cpp udpserver.cpp udpserverselect.cpp)
 add_executable(unp ${SOURCE_FILES})

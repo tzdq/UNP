@@ -18,13 +18,6 @@ again:
         err_sys("str_echo:read echo");
 }
 
-void sig_chld(int sig){
-    pid_t  pid;
-    int stat;
-    while((pid = waitpid(-1,&stat,WNOHANG)) > 0)
-        cout <<"child " << pid << "terminated"<<endl;
-    return;
-}
 #if 0
 int main(int argc,char **argv){
     int listenfd,connfd;
@@ -67,7 +60,7 @@ int main(int argc,char **argv){
     return 0;
 }
 #else
-int xmain(int argc,char **argv){
+int main(int argc,char **argv){
     int listenfd,connfd,sockfd;
     int maxfd,maxi,i;
     int nReady,client[FD_SETSIZE];
@@ -98,7 +91,7 @@ int xmain(int argc,char **argv){
         client[i] = -1;
     FD_ZERO(&allset);
     FD_SET(listenfd,&allset);
-
+    signal(SIGHUP, SIG_IGN);
     for(;;){
         rset = allset;
         nReady = select(maxfd+1,&rset,NULL,NULL,NULL);

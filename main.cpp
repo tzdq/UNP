@@ -6,7 +6,7 @@
 #include <fstream>
 #include "unp.h"
 using namespace std;
-int xmain() {
+int main() {
 #if 0
      uint16_t port =  htons(1234);
     cout << port <<endl;

@@ -188,9 +188,15 @@ int main(int argc,char **argv){
     servaddr.sin_port = htons(8888);
     inet_pton(AF_INET,argv[1],&servaddr.sin_addr);
 
-    Connect(connfd,(struct sockaddr *)&servaddr,sizeof(servaddr));
-
-    str_cli_fork(stdin,connfd);
+    //Connect(connfd,(struct sockaddr *)&servaddr,sizeof(servaddr));
+    int ret = 0;
+    ret = connect_nonblock_select(connfd,(struct sockaddr *)&servaddr,sizeof(servaddr),5);
+    printf("conn ret = %d\n",ret);
+    if(ret != 0){
+        close(connfd);
+        return -1;
+    }
+    str_cli_nonblock(stdin,connfd);
 
     return 0;
 }
