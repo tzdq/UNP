@@ -23,15 +23,21 @@
 #include <unistd.h>
 #include <wait.h>
 #include <time.h>
-#include <sys/epoll.h>
 #include <netdb.h>
 #include <netinet/tcp.h>
+#include <iostream>
+#define  DONT_SUPPORT_EPOLL
+#ifndef DONT_SUPPORT_EPOLL
+#include <sys/epoll.h>
+#endif
+using namespace std;
 
 #define HAVA_VSNPRINTF 1
 #define MAXLINE 4096
 #define LISTENQ 1024
 #define MAX_EPOLL_EVENT_SIZE 1
 #define  MAX_BUFF_SIZE 1024
+#define SA (struct sockaddr*)
 
 ssize_t  readn(int fd,void *ptr,size_t n);
 ssize_t Readline(int fd, void *ptr, size_t maxlen);
@@ -63,6 +69,7 @@ struct addrinfo* Host_serv(const char* host,const char* serv,int family,int sock
 
 void *Malloc(size_t size);
 void sig_chld(int signo);
-
+struct addrinfo* host_serv(const  char *hostname,const char *service,int family,int socktype);
+int tcp_listen(const char *hostname,const char *service,socklen_t *len);
 
 #endif //UNP_UNP_H

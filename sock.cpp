@@ -2,6 +2,7 @@
 // Created by Administrator on 2017/2/17.
 //
 #include <sys/time.h>
+#include <w32api/ws2tcpip.h>
 #include "unp.h"
 
 #define ERROR_PROCESS(sockfd) \
@@ -113,6 +114,7 @@ int connect_nonblock_select(int sockfd,const struct sockaddr* addr,socklen_t add
 //非阻塞connect期望的错误是EINPROGRCESS
 //0 表示成功 -1表示 失败
 int connect_nonblock_epoll(int sockfd,const struct sockaddr* addr,socklen_t addrlen,int nsec){
+#ifndef DONT_SUPPORT_EPOLL
     int flags,ret;
     //可以直接使用上面的setnonblock
     flags = fcntl(sockfd,F_GETFL);
@@ -153,6 +155,8 @@ int connect_nonblock_epoll(int sockfd,const struct sockaddr* addr,socklen_t addr
     //链接成功
     fcntl(sockfd,F_SETFL,flags);
     close(epollfd);
+#else
+#endif
     return 0;
 }
 
@@ -217,4 +221,55 @@ void *Malloc(size_t size)
     if ( (ptr = malloc(size)) == NULL)
         err_sys("malloc error");
     return(ptr);
+}
+
+
+struct addrinfo* host_serv(const  char *hostname,const char *service,int family,int socktype){
+    int ret = 0;
+    struct addrinfo hint,*res;
+    bzero(&hint,sizeof(addrinfo));
+    hint.ai_family = family;
+    hint.ai_socktype = socktype;
+    hint.ai_flags = AI_CANONNAME;
+
+    if((ret = getaddrinfo(hostname,service,&hint,&res)) != 0)
+        return NULL;
+    return res;
+}
+
+int tcp_listen(const char *hostname,const char *service,socklen_t *len){
+    int ret = 0;
+    int sockfd;
+    const  int on = 1;
+
+    struct  addrinfo *res,hint,*tmp;
+    bzero(&hint,sizeof(addrinfo));
+    hint.ai_flags = AI_PASSIVE;
+    hint.ai_socktype = SOCK_STREAM;
+    hint.ai_family = AF_UNSPEC;
+
+    if((ret = getaddrinfo(hostname,service,&hint,&res)) != 0)
+        err_quit("getaddrinfo error,hostname = %s,service = %s,strerr = %s",hostname,service,gai_strerror(ret));
+    tmp = res;
+
+    do{
+        sockfd = socket(res->ai_family,res->ai_socktype,res->ai_protocol);
+        if(sockfd < 0) continue;
+
+        setsockopt(sockfd,SOL_SOCKET,SO_REUSEADDR,&on, sizeof(on));
+
+        if(bind(sockfd,res->ai_addr,res->ai_addrlen) == 0)
+            break;
+
+        close(sockfd);
+    }while(res->ai_next != NULL);
+    if(res == NULL)
+        err_sys("tcp listen error for %s,%s",hostname,service);
+    Listen(sockfd,LISTENQ);
+
+    if(len)
+        *len = res->ai_addrlen;
+
+    freeaddrinfo(tmp);
+    return sockfd;
 }
